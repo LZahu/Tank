@@ -10,20 +10,40 @@ public class Tank {
     // 方向
     private Direction direction;
     private boolean bL, bU, bR, bD;
+    // 坦克分类
+    private Group group;
     // 速度
-    public static final int SPEED = 5;
+    public static final int SPEED = 7;
     // 判断坦克是否移动
     private boolean moving = false;
 
-    public Tank(int x, int y, Direction direction) {
+    public Tank(int x, int y, Direction direction, Group group) {
         this.x = x;
         this.y = y;
         this.direction = direction;
+        this.group = group;
     }
 
     // 刷新坦克
     public void paint(Graphics g){
-        g.fillRect(x, y, 50, 50);
+        // 自己坦克
+        if (group == Group.GOOD) {
+            switch (direction) {
+                case L -> g.drawImage(ResourceMgr.goodTankL, x, y, null);
+                case U -> g.drawImage(ResourceMgr.goodTankU, x, y, null);
+                case R -> g.drawImage(ResourceMgr.goodTankR, x, y, null);
+                case D -> g.drawImage(ResourceMgr.goodTankD, x, y, null);
+            }
+        }
+        // 敌方坦克
+        if (group == Group.BAD) {
+            switch (direction) {
+                case L -> g.drawImage(ResourceMgr.badTankL, x, y, null);
+                case U -> g.drawImage(ResourceMgr.badTankU, x, y, null);
+                case R -> g.drawImage(ResourceMgr.badTankR, x, y, null);
+                case D -> g.drawImage(ResourceMgr.badTankD, x, y, null);
+            }
+        }
     }
 
     // 按键按下
@@ -58,20 +78,18 @@ public class Tank {
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
         switch (key) {
-            case KeyEvent.VK_LEFT -> {
-                bL = false;
-            }
-            case KeyEvent.VK_UP -> {
-                bU = false;
-            }
-            case KeyEvent.VK_RIGHT -> {
-                bR = false;
-            }
-            case KeyEvent.VK_DOWN -> {
-                bD = false;
-            }
+            case KeyEvent.VK_LEFT -> bL = false;
+            case KeyEvent.VK_UP -> bU = false;
+            case KeyEvent.VK_RIGHT -> bR = false;
+            case KeyEvent.VK_DOWN -> bD = false;
+            case KeyEvent.VK_CONTROL -> fire();
         }
         setMainDirection();
+    }
+
+    // 发射子弹
+    private void fire() {
+        TankFrame.INSTANCE.add(new Bullet(x, y, direction, group));
     }
 
     // 设置玩家坦克的方向
