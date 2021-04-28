@@ -1,123 +1,57 @@
 package com.tank;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 
-// 坦克类
 public class Tank {
     // 坐标
     private int x, y;
     // 方向
     private Direction direction;
-    private boolean bL, bU, bR, bD;
     // 坦克分类
     private Group group;
     // 速度
     public static final int SPEED = 7;
     // 判断坦克是否移动
     private boolean moving = false;
+    // 判断坦克是否还活着
+    private boolean live = true;
+    // 上一次所在位置
+    private int oldX, oldY;
+    // 坦克的宽度和高度
+    private final int width, height;
 
     public Tank(int x, int y, Direction direction, Group group) {
         this.x = x;
         this.y = y;
         this.direction = direction;
         this.group = group;
-    }
-
-    // 刷新坦克
-    public void paint(Graphics g){
-        // 自己坦克
-        if (group == Group.GOOD) {
-            switch (direction) {
-                case L -> g.drawImage(ResourceMgr.goodTankL, x, y, null);
-                case U -> g.drawImage(ResourceMgr.goodTankU, x, y, null);
-                case R -> g.drawImage(ResourceMgr.goodTankR, x, y, null);
-                case D -> g.drawImage(ResourceMgr.goodTankD, x, y, null);
-            }
-        }
-        // 敌方坦克
-        if (group == Group.BAD) {
-            switch (direction) {
-                case L -> g.drawImage(ResourceMgr.badTankL, x, y, null);
-                case U -> g.drawImage(ResourceMgr.badTankU, x, y, null);
-                case R -> g.drawImage(ResourceMgr.badTankR, x, y, null);
-                case D -> g.drawImage(ResourceMgr.badTankD, x, y, null);
-            }
-        }
-    }
-
-    // 按键按下
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-        switch (key) {
-            case KeyEvent.VK_LEFT -> {
-                x -= SPEED;
-                bL = true;
-                direction = Direction.L;
-            }
-            case KeyEvent.VK_UP -> {
-                y -= SPEED;
-                bU = true;
-                direction = Direction.U;
-            }
-            case KeyEvent.VK_RIGHT -> {
-                x += SPEED;
-                bR = true;
-                direction = Direction.R;
-            }
-            case KeyEvent.VK_DOWN -> {
-                y += SPEED;
-                bD = true;
-                direction = Direction.D;
-            }
-        }
-        setMainDirection();
-    }
-
-    // 按键释放
-    public void keyReleased(KeyEvent e) {
-        int key = e.getKeyCode();
-        switch (key) {
-            case KeyEvent.VK_LEFT -> bL = false;
-            case KeyEvent.VK_UP -> bU = false;
-            case KeyEvent.VK_RIGHT -> bR = false;
-            case KeyEvent.VK_DOWN -> bD = false;
-            case KeyEvent.VK_CONTROL -> fire();
-        }
-        setMainDirection();
+        this.oldX = x;
+        this.oldY = y;
+        width = ResourceMgr.goodTankU.getWidth();
+        height = ResourceMgr.goodTankU.getHeight();
     }
 
     // 发射子弹
-    private void fire() {
-        TankFrame.INSTANCE.add(new Bullet(x, y, direction, group));
+    public void fire() {
+        int bX = x + ResourceMgr.goodTankU.getWidth() / 2 - ResourceMgr.bulletU.getWidth() / 2;
+        int bY = y + ResourceMgr.goodTankU.getHeight() / 2 - ResourceMgr.bulletU.getHeight() / 2;
+        TankFrame.INSTANCE.add(new Bullet(bX, bY, direction, group));
     }
 
-    // 设置玩家坦克的方向
-    private void setMainDirection() {
-        // 如果所有按键释放，坦克应当停止
-        if (!bL && !bU && !bR && !bD){
-            moving = false;
-        }
-        // 如果有任一按键按下，坦克应当移动
-        else {
-            moving = true;
-            if (bL && !bU && !bR && !bD){
-                direction = Direction.L;
-            }
-            if (!bL && bU && !bR && !bD){
-                direction = Direction.U;
-            }
-            if (!bL && !bU && bR && !bD){
-                direction = Direction.R;
-            }
-            if (!bL && !bU && !bR && bD){
-                direction = Direction.D;
-            }
-        }
-    }
+    // 刷新坦克
+    public void paint(Graphics g){}
 
     // 移动坦克
-    private void move() {
+    public void move() {
+        if (!moving){
+            return;
+        }
+
+        // 判断是否出界，并记录上一次的位置
+        boundsCheck();
+        oldX = x;
+        oldY = y;
+
         switch (direction) {
             case L -> x -= SPEED;
             case U -> y -= SPEED;
@@ -126,4 +60,70 @@ public class Tank {
         }
     }
 
+    // 边界检测
+    public void boundsCheck() {
+        if (x < 0 || y < 30 || x + width > TankFrame.GAME_WIDTH || y + height > TankFrame.GAME_HEIGHT){
+            back();
+        }
+    }
+
+    // 坦克重置为上一次的位置
+    public void back() {
+        x = oldX;
+        y = oldY;
+    }
+
+    // 坦克被打中，死了
+    public void die() {
+        this.setLive(false);
+        TankFrame.INSTANCE.add(new Explode(x, y));
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
+    public boolean isMoving() {
+        return moving;
+    }
+
+    public void setMoving(boolean moving) {
+        this.moving = moving;
+    }
+
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
+    }
 }

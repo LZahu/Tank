@@ -6,11 +6,6 @@ public class Main {
         tankFrame.setVisible(true);
 
         while (true){
-//            try {
-//                TimeUnit.MILLISECONDS.sleep(250);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
             tankFrame.repaint();
         }
     }

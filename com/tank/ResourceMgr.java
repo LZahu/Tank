@@ -9,7 +9,7 @@ public class ResourceMgr {
     public static BufferedImage goodTankL, goodTankU, goodTankR, goodTankD;
     public static BufferedImage badTankL, badTankU, badTankR, badTankD;
     public static BufferedImage bulletL, bulletU, bulletR, bulletD;
-    public static BufferedImage[] explores = new BufferedImage[16];
+    public static BufferedImage[] explodes = new BufferedImage[16];
 
     static {
         try {
@@ -29,7 +29,7 @@ public class ResourceMgr {
             bulletD = ImageUtil.rotateImage(bulletU, 180);
 
             for (int i = 0; i < 16; i++){
-                explores[i] = ImageIO.read(Objects.requireNonNull(ResourceMgr.class.getClassLoader().getResourceAsStream("images/e" + String.valueOf(i + 1) + ".gif")));
+                explodes[i] = ImageIO.read(Objects.requireNonNull(ResourceMgr.class.getClassLoader().getResourceAsStream("images/e" + String.valueOf(i + 1) + ".gif")));
             }
 
         }catch (Exception e){
